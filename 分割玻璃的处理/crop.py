@@ -29,20 +29,20 @@ def crop_green_edges(image):
     mask = cv2.inRange(hsv, lower_green, upper_green)
 
     # 找到绿色边缘的坐标
-    top_edge = 0
-    bottom_edge = image.shape[0]
+    up_edge = 0
+    down_edge = image.shape[0]
     left_edge = 0
     right_edge = image.shape[1]
 
     # 上边缘
     for i in range(int(0.1 * image.shape[0])):
         if np.any(mask[i]):
-            top_edge = i
+            up_edge = i
 
     # 下边缘
     for i in range(image.shape[0]-1, int(0.9 * image.shape[0]), -1):
         if np.any(mask[i]):
-            bottom_edge = i
+            down_edge = i
 
     # 左边缘
     for i in range(int(0.08 * image.shape[1])):
@@ -58,13 +58,13 @@ def crop_green_edges(image):
     offset = 14
 
     # 裁剪图像
-    cropped_image = image[top_edge + offset:bottom_edge - offset, left_edge + offset:right_edge - offset]
+    cropped_image = image[up_edge + offset:down_edge - offset, left_edge + offset:right_edge - offset]
 
     # 相对位置信息
     relative_x = left_edge + offset
-    relative_y = top_edge + offset
+    relative_y = up_edge + offset
     w = right_edge - left_edge - 2 * offset
-    h = bottom_edge - top_edge - 2 * offset
+    h = down_edge - up_edge - 2 * offset
     relative_position = (relative_x, relative_y)
 
     return cropped_image, relative_position

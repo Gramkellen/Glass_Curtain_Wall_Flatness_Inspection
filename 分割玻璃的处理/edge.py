@@ -28,13 +28,13 @@ def detect_reflected_edges(image):
     contours, _ = cv2.findContours(th1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # 记录反射图像的边缘坐标
-    edges = {'top': [], 'left': [], 'bottom': [], 'right': []}
+    edges = {'up': [], 'left': [], 'down': [], 'right': []}
 
     # 遍历轮廓
     for contour in contours:
         # 初始化边缘点
-        top_points = []
-        bottom_points = []
+        up_points = []
+        down_points = []
         left_points = []
         right_points = []
 
@@ -43,27 +43,27 @@ def detect_reflected_edges(image):
 
             # 判断边缘方向
             if y == 0:
-                top_points.append(x)
+                up_points.append(x)
             elif y == image.shape[0] - 1:
-                bottom_points.append(x)
+                down_points.append(x)
             if x == 0:
                 left_points.append(y)
             elif x == image.shape[1] - 1:
                 right_points.append(y)
 
         # 更新边缘范围
-        if top_points:
-            min_x, max_x = min(top_points), max(top_points)
+        if up_points:
+            min_x, max_x = min(up_points), max(up_points)
             if max_x - min_x >= 4:
-                edges['top'].append((min_x, max_x))
+                edges['up'].append((min_x, max_x))
         if left_points:
             min_y, max_y = min(left_points), max(left_points)
             if max_y - min_y >= 4:
                 edges['left'].append((min_y, max_y))
-        if bottom_points:
-            min_x, max_x = min(bottom_points), max(bottom_points)
+        if down_points:
+            min_x, max_x = min(down_points), max(down_points)
             if max_x - min_x >= 4:
-                edges['bottom'].append((min_x, max_x))
+                edges['down'].append((min_x, max_x))
         if right_points:
             min_y, max_y = min(right_points), max(right_points)
             if max_y - min_y >= 4:
@@ -86,9 +86,9 @@ if __name__ == "__main__":
     # 打印边缘信息
     print("|      | 反射图像边缘  |")
     print("| ---- | ------------- |")
-    print(f"| 上   | {edges['top']}       |")
+    print(f"| 上   | {edges['up']}       |")
     print(f"| 左   | {edges['left']}       |")
-    print(f"| 下   | {edges['bottom']}       |")
+    print(f"| 下   | {edges['down']}       |")
     print(f"| 右   | {edges['right']}       |")
 
     # 显示包含轮廓的图像
