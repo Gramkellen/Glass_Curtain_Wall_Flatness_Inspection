@@ -1,11 +1,73 @@
 """
-      额外的分割方法尝试
+      额外的分割方法尝试：
+      1. 先进行垂直线分割
+      2. 进行水平线分割
+      垂直线分割需要避免相邻边框的影响 → 目前来看阈值为180的效果比较好
 """
 
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def verticalSplit(file_path):
+    # 避免距离较近的结构胶影响分割效果
+    def filter_close_lines(lines, min_distance):
+        """过滤掉距离过近的垂直线"""
+        if not lines:
+            return []
+
+        # 首先按位置排序
+        sorted_lines = sorted(lines)
+
+        # 过滤过近的线
+        filtered_lines = [sorted_lines[0]]  # 添加第一条线
+        for line in sorted_lines[1:]:
+            if line - filtered_lines[-1] >= min_distance:
+                filtered_lines.append(line)
+        return filtered_lines
+
+    def find_vertical_lines(image):
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+
+        # 使用霍夫变换检测直线
+        lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=80, minLineLength=100, maxLineGap=5)
+
+        vertical_lines = []
+        if lines is not None:
+            for line in lines:
+                x1, y1, x2, y2 = line[0]
+                if abs(x2 - x1) < 10:  # 垂直线的斜率判断，阈值可以调整
+                    vertical_lines.append((x1 + x2) // 2)
+
+        # 返回所有检测到的垂直线的X坐标，返回前进行了排序的操作
+        return sorted(filter_close_lines(vertical_lines, 180))
+
+    def crop_images_by_lines(image, line_positions):
+        cropped_images = []
+        start_x = 0
+        for x in line_positions:
+            cropped_images.append(image[:, start_x:x])
+            start_x = x
+        # 添加最后一个窗格
+        cropped_images.append(image[:, start_x:])
+        return cropped_images
+
+    image = cv2.imread(file_path)
+
+    # 找到垂直线
+    vertical_lines = find_vertical_lines(image)
+
+    # 裁剪图像
+    cropped_images = crop_images_by_lines(image, vertical_lines)
+
+    # 显示裁剪后的图像
+    for idx, img in enumerate(cropped_images):
+        plt.subplot(1, len(cropped_images), idx + 1)
+        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        plt.axis('off')
+    plt.show()
 
 def detect_grid(image_path, area_threshold):
     image = cv2.imread(image_path)
@@ -79,7 +141,7 @@ def detect_grid(image_path, area_threshold):
 
 if __name__ == "__main__":
     file_path = "data/split.png"
-    detect_grid(file_path, area_threshold=50)
+    verticalSplit(file_path)
 
 
 
