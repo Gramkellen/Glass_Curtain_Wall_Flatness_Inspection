@@ -58,14 +58,22 @@ def split_glass_wall(image):
         x1, y1, w1, h1 = box1
         x2, y2, w2, h2 = box2
 
-        if abs(x1 + w1 - x2) <= tolerance:  # box1 is on the left of box2
-            return 'right'
-        elif abs(x2 + w2 - x1) <= tolerance:  # box1 is on the right of box2
-            return 'left'
-        elif abs(y1 + h1 - y2) <= tolerance:  # box1 is above box2
-            return 'down'
-        elif abs(y2 + h2 - y1) <= tolerance:  # box1 is below box2
-            return 'up'
+        # box1和box2在同一行
+        if abs(y1 - y2) <= tolerance:
+            # box2在box1右侧
+            if abs(x1 + w1 - x2) <= tolerance:
+                return 'right'
+            # box2在box1左侧
+            elif abs(x2 + w2 - x1) <= tolerance:  # box1 is on the right of box2
+                return 'left'
+        # box1和box2在同一列
+        elif abs(x1 - x2) <= tolerance:
+            # box2在box1下侧
+            if abs(y1 + h1 - y2) <= tolerance:
+                return 'down'
+            # box2在box1上侧
+            elif abs(y2 + h2 - y1) <= tolerance:
+                return 'up'
         return None
 
     # 得到相反方向
@@ -96,7 +104,7 @@ def split_glass_wall(image):
 
 
 if __name__ == "__main__":
-    file_path = "data/split.png"
+    file_path = "data/split1.png"
     image = cv2.imread(file_path)
     cropped_images, cropped_positions, adjacency_dict = split_glass_wall(image)
 
