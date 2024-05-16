@@ -176,6 +176,6 @@ def match_reflected_edges(image):
 
 
 if __name__ == "__main__":
-    file_path = "data/split1.png"
+    file_path = "data/test1.png"
     image = cv2.imread(file_path)
     match_reflected_edges(image)

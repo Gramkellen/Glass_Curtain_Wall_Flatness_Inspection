@@ -3,7 +3,22 @@
       1. 先进行垂直线分割
       2. 进行水平线分割
       垂直线分割需要避免相邻边框的影响 → 目前来看阈值为180的效果比较好
+
+      函数说明：
+      add_column : 进行邻接矩阵的形成
+
+      filter_close_lines(line,min_distance)
+        传入检测到的线的集合和线之间的最小距离，进行筛选
+        ** mark ：如果分割有问题，就调整 min_distance **
+
+     find_lines(image, orientation='vertical', line_length=100, line_gap=5, min_distance = 180)
+        根据图像和查找方向【水平 / 垂直】，返回对应的直线
+        min_distance和filter_close_lines的传参对应的
+
+    crop_images_by_orientation()
+        裁剪得到图像
 """
+
 
 import cv2
 import numpy as np
@@ -82,7 +97,7 @@ def crop_images_by_orientation(image, line_positions, orientation):
 def complexSplit(file_path):
     image = cv2.imread(file_path)
     # 先进行垂直分割
-    vertical_lines = find_lines(image, 'vertical')
+    vertical_lines = find_lines(image, 'vertical',min_distance=1800)
 
     # 裁剪图像
     vertically_cropped_images = crop_images_by_orientation(image, vertical_lines, 'vertical')
@@ -97,7 +112,7 @@ def complexSplit(file_path):
     matrix = np.empty((0, 0))
     for v_img in vertically_cropped_images:
         row = 0
-        horizontal_lines = find_lines(v_img, 'horizontal',min_distance = 100)
+        horizontal_lines = find_lines(v_img, 'horizontal',min_distance = 500)
         horizontally_cropped_images = crop_images_by_orientation(v_img, horizontal_lines, 'horizontal')
         # 过滤掉面积过小的图像
         new_col = []
@@ -120,7 +135,7 @@ def complexSplit(file_path):
 
 
 if __name__ == "__main__":
-    file_path = "data/split.png"
+    file_path = "data/test1.png"
     complexSplit(file_path)
 
 

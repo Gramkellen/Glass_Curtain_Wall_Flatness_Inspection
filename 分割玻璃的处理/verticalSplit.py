@@ -42,7 +42,7 @@ def verticalSplit(file_path):
                     vertical_lines.append((x1 + x2) // 2)
 
         # 返回所有检测到的垂直线的X坐标，返回前进行了排序的操作
-        return sorted(filter_close_lines(vertical_lines, 180))
+        return sorted(filter_close_lines(vertical_lines, 1800))
 
     def crop_images_by_lines(image, line_positions):
         cropped_images = []
@@ -140,9 +140,12 @@ def detect_grid(image_path, area_threshold):
 
 
 if __name__ == "__main__":
-    file_path = "data/split.png"
+    file_path = "data/test1.png"
     verticalSplit(file_path)
 
+    # pri1 → 对应的筛选阈值是2000
+    # split对应的筛选阈值是180
+    # 近拍和远拍的筛选不太一样
 
 
 

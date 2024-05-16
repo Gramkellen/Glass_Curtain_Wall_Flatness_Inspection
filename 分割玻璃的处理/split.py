@@ -38,7 +38,7 @@ def split_glass_wall(image):
 
     # 使用删除后的最大面积作为新的面积标准
     max_area = cv2.contourArea(max(contours, key=cv2.contourArea))
-    min_area = 0.9 * max_area  # 90% of the max contour area
+    min_area = 0.03 * max_area  # 90% of the max contour area
 
     filtered_contours = filter_contours_by_area(contours, min_area)
 
@@ -104,7 +104,7 @@ def split_glass_wall(image):
 
 
 if __name__ == "__main__":
-    file_path = "data/split1.png"
+    file_path = "data/test1.png"
     image = cv2.imread(file_path)
     cropped_images, cropped_positions, adjacency_dict = split_glass_wall(image)
 
