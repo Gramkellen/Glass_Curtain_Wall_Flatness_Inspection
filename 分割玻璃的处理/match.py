@@ -149,30 +149,31 @@ def match_reflected_edges(image):
         # 检查上侧是否有邻接
         result = match_two_edge(all_edges, adjacents, positions, idx, 'up')
         if result is True:
-            print("第", idx, "号和第", adjacents['up'][0], "号玻璃反射边缘一致")
+            print("第", idx, "号和第", adjacents['up'][0], "号玻璃反射边缘一致\n")
         elif result is False:
-            print("第", idx, "号和第", adjacents['up'][0], "号玻璃反射边缘不一致")
+            print("第", idx, "号和第", adjacents['up'][0], "号玻璃反射边缘不一致\n")
 
         # 检查下侧是否有邻接
         result = match_two_edge(all_edges, adjacents, positions, idx, 'down')
         if result is True:
-            print("第", idx, "号和第", adjacents['down'][0], "号玻璃反射边缘一致")
+            print("第", idx, "号和第", adjacents['down'][0], "号玻璃反射边缘一致\n")
         elif result is False:
-            print("第", idx, "号和第", adjacents['down'][0], "号玻璃反射边缘不一致")
+            print("第", idx, "号和第", adjacents['down'][0], "号玻璃反射边缘不一致\n")
 
         # 检查左侧是否有邻接
         result = match_two_edge(all_edges, adjacents, positions, idx, 'left')
         if result is True:
-            print("第", idx, "号和第", adjacents['left'][0], "号玻璃反射边缘一致")
+            print("第", idx, "号和第", adjacents['left'][0], "号玻璃反射边缘一致\n")
         elif result is False:
-            print("第", idx, "号和第", adjacents['left'][0], "号玻璃反射边缘不一致")
+            print("第", idx, "号和第", adjacents['left'][0], "号玻璃反射边缘不一致\n")
 
         # 检查右侧是否有邻接
         result = match_two_edge(all_edges, adjacents, positions, idx, 'right')
         if result is True:
-            print("第", idx, "号和第", adjacents['right'][0], "号玻璃反射边缘一致")
+            print("第", idx, "号和第", adjacents['right'][0], "号玻璃反射边缘一致\n")
         elif result is False:
-            print("第", idx, "号和第", adjacents['right'][0], "号玻璃反射边缘不一致")
+            print("第", idx, "号和第", adjacents['right'][0], "号玻璃反射边缘不一致\n")
+
 
 
 if __name__ == "__main__":

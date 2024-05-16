@@ -1,10 +1,18 @@
+'''
+  这只是一个尝试 —— 可全部修改
+
+  注：分割算法的尝试都可以放到这里
+'''
+
+
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
 # 重新加载图像
-image_path = "data/test1.png"
+image_path = "../data/test1.png"
 image = Image.open(image_path)
 image_np = np.array(image)
 hsv_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2HSV)
