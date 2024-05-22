@@ -4,7 +4,8 @@
 """
 
 import cv2
-from split import split_glass_wall
+# from split import split_glass_wall
+from complexSplit import complexSplit
 from crop import crop_green_edges
 from edge import detect_reflected_edges
 
@@ -55,8 +56,8 @@ def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=4)
                         cur_edge_l, cur_edge_r = all_edges[idx][direction][0]
                         adj_edge_l, adj_edge_r = all_edges[adjacent][opposite_direction][0]
                         # 两个邻接窗户的横坐标
-                        cur_cropped_x, _ = positions[idx]
-                        adj_cropped_x, _ = positions[adjacent]
+                        cur_cropped_x, _, _, _ = positions[idx]
+                        adj_cropped_x, _, _, _ = positions[adjacent]
                         # 两个邻接窗户的反射边缘绝对横坐标
                         cur_l = cur_edge_l + cur_cropped_x
                         cur_r = cur_edge_r + cur_cropped_x
@@ -74,8 +75,8 @@ def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=4)
                         cur_edge_u, cur_edge_d = all_edges[idx][direction][0]
                         adj_edge_u, adj_edge_d = all_edges[adjacent][opposite_direction][0]
                         # 两个邻接窗户的纵坐标
-                        _, cur_cropped_y = positions[idx]
-                        _, adj_cropped_y = positions[adjacent]
+                        _, cur_cropped_y, _, _ = positions[idx]
+                        _, adj_cropped_y, _, _ = positions[adjacent]
                         # 两个邻接窗户的反射边缘绝对横坐标
                         cur_u = cur_edge_u + cur_cropped_y
                         cur_d = cur_edge_d + cur_cropped_y
@@ -115,7 +116,7 @@ def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=4)
 
 def match_reflected_edges(image):
     # 获取分割后的玻璃图像并得到邻接关系字典
-    cropped_images, cropped_positions, adjacency_dict = split_glass_wall(image)
+    cropped_images, cropped_positions, adjacency_dict = complexSplit(image)
 
     # 各玻璃的位置信息
     positions = []
@@ -129,8 +130,8 @@ def match_reflected_edges(image):
 
         # 计算位置信息
         x, y = cropped_positions[idx]
-        relative_x, relative_y = relative_position
-        positions.append((x + relative_x, y + relative_y))
+        relative_x, relative_y, w, h = relative_position
+        positions.append((x + relative_x, y + relative_y, w, h))
 
         # 获取反射图像边缘信息
         edges, _ = detect_reflected_edges(cropped_img)
@@ -138,45 +139,46 @@ def match_reflected_edges(image):
         # 存储edges信息
         all_edges[idx] = edges
 
-    # 打印位置信息（测试）
-    print("所有玻璃位置信息（左上角坐标）：", positions)
-
     # 比较相邻图像的反射图像边缘坐标范围是否一致
     for idx in range(len(adjacency_dict)):
         # 得到该图像的邻接关系
         adjacents = adjacency_dict[idx]
 
-        # 检查上侧是否有邻接
-        result = match_two_edge(all_edges, adjacents, positions, idx, 'up')
-        if result is True:
-            print("第", idx, "号和第", adjacents['up'][0], "号玻璃反射边缘一致\n")
-        elif result is False:
-            print("第", idx, "号和第", adjacents['up'][0], "号玻璃反射边缘不一致\n")
+        # 邻接方向
+        directions = ['up', 'down', 'left', 'right']
 
-        # 检查下侧是否有邻接
-        result = match_two_edge(all_edges, adjacents, positions, idx, 'down')
-        if result is True:
-            print("第", idx, "号和第", adjacents['down'][0], "号玻璃反射边缘一致\n")
-        elif result is False:
-            print("第", idx, "号和第", adjacents['down'][0], "号玻璃反射边缘不一致\n")
+        # 检测各方向邻接玻璃反射边缘是否一致
+        for direction in directions:
+            result = match_two_edge(all_edges, adjacents, positions, idx, direction)
+            # 存在邻接关系
+            if result is True or result is False:
+                # 反射边缘一致
+                if result is True:
+                    print("第", idx, "号和第", adjacents[direction][0], "号玻璃反射边缘一致")
+                # 反射边缘不一致
+                else:
+                    print("第", idx, "号和第", adjacents[direction][0], "号玻璃反射边缘不一致")
 
-        # 检查左侧是否有邻接
-        result = match_two_edge(all_edges, adjacents, positions, idx, 'left')
-        if result is True:
-            print("第", idx, "号和第", adjacents['left'][0], "号玻璃反射边缘一致\n")
-        elif result is False:
-            print("第", idx, "号和第", adjacents['left'][0], "号玻璃反射边缘不一致\n")
+                # 绘制边框信息
+                labeled_image = image.copy()
+                # 标注当前玻璃
+                pos_x, pos_y, pos_w, pos_h = positions[idx]
+                cv2.rectangle(labeled_image, (pos_x, pos_y), (pos_x + pos_w, pos_y + pos_h), (0, 0, 255), 16)
+                # 标注相邻玻璃
+                adj_x, adj_y, adj_w, adj_h = positions[adjacents[direction][0]]
+                cv2.rectangle(labeled_image, (adj_x, adj_y), (adj_x + adj_w, adj_y + adj_h), (255, 0, 0), 16)
 
-        # 检查右侧是否有邻接
-        result = match_two_edge(all_edges, adjacents, positions, idx, 'right')
-        if result is True:
-            print("第", idx, "号和第", adjacents['right'][0], "号玻璃反射边缘一致\n")
-        elif result is False:
-            print("第", idx, "号和第", adjacents['right'][0], "号玻璃反射边缘不一致\n")
-
+                # 调整窗口大小
+                window_name = 'match'
+                cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+                cv2.resizeWindow(window_name, 800, 600)
+                # 显示图像
+                cv2.imshow(window_name, labeled_image)
+                cv2.waitKey(0)
 
 
 if __name__ == "__main__":
     file_path = "data/test1.png"
     image = cv2.imread(file_path)
+
     match_reflected_edges(image)

@@ -94,49 +94,114 @@ def crop_images_by_orientation(image, line_positions, orientation):
     return cropped_images
 
 # 多层次的复杂分割函数实现
-def complexSplit(file_path):
-    image = cv2.imread(file_path)
+def complexSplit(image):
+    """
+    该函数用于将玻璃幕墙图像分割为一扇扇窗户。
+
+    参数:
+    - image: 玻璃幕墙图像（已完成反射分割和边框检测）。
+
+    返回值:
+    - cropped_images: 裁剪后的窗户图像列表。
+    - cropped_positions: 裁剪后的窗户位置信息 (x, y) 列表。
+    - adjacency_dict: 图片的邻接关系字典列表。
+    """
     # 先进行垂直分割
-    vertical_lines = find_lines(image, 'vertical',min_distance=1800)
+    vertical_lines = find_lines(image, 'vertical', min_distance=1800)
+
+    # 打印垂直分割线
+    # print(vertical_lines)
+
+    # 得到列数
+    col = len(vertical_lines) - 1
 
     # 裁剪图像
     vertically_cropped_images = crop_images_by_orientation(image, vertical_lines, 'vertical')
 
     # 移除掉两侧的图像
-    if(len(vertically_cropped_images) >= 2):
+    if len(vertically_cropped_images) >= 2:
         vertically_cropped_images.pop(0)
         vertically_cropped_images.pop(-1)
-    # 显示裁剪后的图像
-    # 对每个垂直分割的部分应用水平分割
-    all_cropped_images = []
-    matrix = np.empty((0, 0))
-    for v_img in vertically_cropped_images:
-        row = 0
-        horizontal_lines = find_lines(v_img, 'horizontal',min_distance = 500)
-        horizontally_cropped_images = crop_images_by_orientation(v_img, horizontal_lines, 'horizontal')
-        # 过滤掉面积过小的图像
-        new_col = []
-        for h_img in horizontally_cropped_images:
-            if h_img.size > 100000:  # 面积阈值，根据需要调整
-                all_cropped_images.append(h_img)
-                new_col.append(row)
-                row += 1
 
-        if row != 0 :
-            matrix = add_column(matrix, new_col)
-    print(matrix)
-    # 显示结果
-    plt.figure(figsize=(12, 8))
-    for idx, img in enumerate(all_cropped_images):
-        plt.subplot(1, len(all_cropped_images), idx + 1)
-        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        plt.axis('off')
-    plt.show()
+    # 存储所有分割后的图片
+    cropped_images = []
+
+    # 存储每个分割后玻璃的位置信息，格式(x, y)
+    cropped_positions = []
+
+    # 存储每个分割后玻璃的邻接关系
+    adjacency_dict = []
+
+    # 对每个垂直分割的部分应用水平分割
+    for col_idx, v_img in enumerate(vertically_cropped_images):
+        # 该列玻璃的x和w
+        x = vertical_lines[col_idx]
+
+        # 得到水平分割线
+        horizontal_lines = find_lines(v_img, 'horizontal', min_distance=500)
+
+        # 打印水平分割线
+        # print(horizontal_lines)
+
+        # 得到行数
+        row = len(horizontal_lines) - 1
+
+        horizontally_cropped_images = crop_images_by_orientation(v_img, horizontal_lines, 'horizontal')
+
+        # 移除两端的图像
+        if len(horizontally_cropped_images) >= 2:
+            horizontally_cropped_images.pop(0)
+            horizontally_cropped_images.pop(-1)
+
+        # 将得到的裁剪后的图片保存
+        for row_idx, h_img in enumerate(horizontally_cropped_images):
+            # 当前图片在总裁剪图片列表中的下标
+            idx = len(cropped_images)
+
+            # 将该分割后图片添加进cropped_images
+            cropped_images.append(h_img)
+
+            # 得到该玻璃的y和h
+            y = horizontal_lines[row_idx]
+
+            # 将该分割后图片的位置信息添加进cropped_positions
+            cropped_positions.append((x, y))
+            # print(cropped_positions[idx])
+
+            # 该分割后图片的邻接关系
+            adjacency = {'left': [], 'right': [], 'up': [], 'down': []}
+            # 左邻接
+            if col_idx > 0:
+                adjacency['left'].append(idx - row)
+            # 右邻接
+            if col_idx < col - 1:
+                adjacency['right'].append(idx + row)
+            # 上邻接
+            if row_idx > 0:
+                adjacency['up'].append(idx - 1)
+            # 下邻接
+            if row_idx < row - 1:
+                adjacency['down'].append(idx + 1)
+            # 将该分割后图片的邻接关系添加进adjacency_dict
+            adjacency_dict.append(adjacency)
+            # print(adjacency_dict[idx])
+
+    return cropped_images, cropped_positions, adjacency_dict
 
 
 if __name__ == "__main__":
     file_path = "data/test1.png"
-    complexSplit(file_path)
+    image = cv2.imread(file_path)
+
+    # 分割图片
+    cropped_images, cropped_positions, adjacency_dict = complexSplit(image)
+
+    for idx, img in enumerate(cropped_images):
+        print("第", idx, "张分割照片：")
+        cv2.imshow("split", img)
+        print("位置信息：", cropped_positions[idx])
+        print("邻接关系：", adjacency_dict[idx])
+        cv2.waitKey(0)
 
 
 

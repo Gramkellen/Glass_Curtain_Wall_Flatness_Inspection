@@ -15,7 +15,7 @@ def crop_green_edges(image):
 
     返回值:
     - cropped_image: 裁剪掉绿色窗框的图像。
-    - relative_position: 相对位置信息 (relative_x, relative_y)。
+    - relative_position: 相对位置信息 (relative_x, relative_y, w, h)。
     """
 
     # 将图像转换为HSV色彩空间
@@ -65,7 +65,7 @@ def crop_green_edges(image):
     relative_y = up_edge + offset
     w = right_edge - left_edge - 2 * offset
     h = down_edge - up_edge - 2 * offset
-    relative_position = (relative_x, relative_y)
+    relative_position = (relative_x, relative_y, w, h)
 
     return cropped_image, relative_position
 
