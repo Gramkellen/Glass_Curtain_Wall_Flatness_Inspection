@@ -18,15 +18,15 @@ def crop_green_edges(image):
     - relative_position: 相对位置信息 (relative_x, relative_y, w, h)。
     """
 
-    # 将图像转换为HSV色彩空间
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # 定义绿色范围
-    lower_green = np.array([35, 50, 50])
-    upper_green = np.array([85, 255, 255])
-
-    # 创建掩码
-    mask = cv2.inRange(hsv, lower_green, upper_green)
+    # # 将图像转换为HSV色彩空间
+    # hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    #
+    # # 定义绿色范围
+    # lower_green = np.array([35, 50, 50])
+    # upper_green = np.array([85, 255, 255])
+    #
+    # # 创建掩码
+    # mask = cv2.inRange(hsv, lower_green, upper_green)
 
     # 找到绿色边缘的坐标
     up_edge = 0
@@ -34,37 +34,40 @@ def crop_green_edges(image):
     left_edge = 0
     right_edge = image.shape[1]
 
-    # 上边缘
-    for i in range(int(0.1 * image.shape[0])):
-        if np.any(mask[i]):
-            up_edge = i
+    # # 上边缘
+    # for i in range(int(0.1 * image.shape[0])):
+    #     if np.any(mask[i]):
+    #         up_edge = i
+    #
+    # # 下边缘
+    # for i in range(image.shape[0]-1, int(0.9 * image.shape[0]), -1):
+    #     if np.any(mask[i]):
+    #         down_edge = i
+    #
+    # # 左边缘
+    # for i in range(int(0.08 * image.shape[1])):
+    #     if np.any(mask[:, i]):
+    #         left_edge = i
+    #
+    # # 右边缘
+    # for i in range(image.shape[1]-1, int(0.92 * image.shape[1]), -1):
+    #     if np.any(mask[:, i]):
+    #         right_edge = i
 
-    # 下边缘
-    for i in range(image.shape[0]-1, int(0.9 * image.shape[0]), -1):
-        if np.any(mask[i]):
-            down_edge = i
-
-    # 左边缘
-    for i in range(int(0.08 * image.shape[1])):
-        if np.any(mask[:, i]):
-            left_edge = i
-
-    # 右边缘
-    for i in range(image.shape[1]-1, int(0.92 * image.shape[1]), -1):
-        if np.any(mask[:, i]):
-            right_edge = i
-
-    # 偏移
-    offset = 14
+    # 垂直方向偏移
+    vertical_offset = 80
+    # 水平方向偏移
+    horizontal_offset = 140
 
     # 裁剪图像
-    cropped_image = image[up_edge + offset:down_edge - offset, left_edge + offset:right_edge - offset]
+    cropped_image = image[up_edge + vertical_offset:down_edge - vertical_offset,
+                    left_edge + horizontal_offset:right_edge - horizontal_offset]
 
     # 相对位置信息
-    relative_x = left_edge + offset
-    relative_y = up_edge + offset
-    w = right_edge - left_edge - 2 * offset
-    h = down_edge - up_edge - 2 * offset
+    relative_x = left_edge + horizontal_offset
+    relative_y = up_edge + vertical_offset
+    w = right_edge - left_edge - 2 * horizontal_offset
+    h = down_edge - up_edge - 2 * vertical_offset
     relative_position = (relative_x, relative_y, w, h)
 
     return cropped_image, relative_position

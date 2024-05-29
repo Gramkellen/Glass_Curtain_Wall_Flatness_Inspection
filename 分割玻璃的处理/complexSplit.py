@@ -24,6 +24,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def add_column(matrix, new_col):
     if matrix.size == 0:
         # 如果矩阵是空的，初始化矩阵为第一列
@@ -34,6 +35,7 @@ def add_column(matrix, new_col):
         matrix = np.hstack((matrix, new_col))
 
     return matrix
+
 
 # 过滤掉接近的边线
 def filter_close_lines(lines, min_distance):
@@ -50,6 +52,7 @@ def filter_close_lines(lines, min_distance):
         if line - filtered_lines[-1] >= min_distance:
             filtered_lines.append(line)
     return filtered_lines
+
 
 # 按照水平和竖直，利用Canny检测去查找边缘线
 def find_lines(image, orientation='vertical', line_length=100, line_gap=5, min_distance = 180):
@@ -73,6 +76,7 @@ def find_lines(image, orientation='vertical', line_length=100, line_gap=5, min_d
     # 排序并过滤掉过于接近的线
     return sorted(filter_close_lines(line_positions, min_distance))
 
+
 # 裁剪得到对应的图片，并进行返回
 def crop_images_by_orientation(image, line_positions, orientation):
     cropped_images = []
@@ -92,6 +96,7 @@ def crop_images_by_orientation(image, line_positions, orientation):
         cropped_images.append(image[start:, :])
 
     return cropped_images
+
 
 # 多层次的复杂分割函数实现
 def complexSplit(image):

@@ -1,16 +1,14 @@
 """
-！！！未完成！！！
 该脚本用于读取玻璃幕墙图像，判断相邻玻璃反射图像边缘坐标范围是否匹配。
 """
 
 import cv2
-# from split import split_glass_wall
 from complexSplit import complexSplit
 from crop import crop_green_edges
 from edge import detect_reflected_edges
 
 
-def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=4):
+def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=14):
     """
     该函数用于比较两个相邻玻璃的反射边缘是否一致。
 
@@ -43,8 +41,8 @@ def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=4)
         # 只检测坐标大于当前图像的，避免重复检测
         if adjacent > idx:
             # 打印当前窗户和邻接窗户边缘坐标（测试）
-            print(all_edges[idx])
-            print(all_edges[adjacent])
+            # print(all_edges[idx])
+            # print(all_edges[adjacent])
 
             # 当前图片反射图像存在direction边缘
             if len(all_edges[idx][direction]):
@@ -63,6 +61,9 @@ def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=4)
                         cur_r = cur_edge_r + cur_cropped_x
                         adj_l = adj_edge_l + adj_cropped_x
                         adj_r = adj_edge_r + adj_cropped_x
+                        # 输出两个玻璃比较的反射边缘的范围
+                        print(idx, "号玻璃的", direction, "反射边缘为：(", cur_l, ',', cur_r, ")")
+                        print(adjacent, "号玻璃的", opposite_direction, "反射边缘为：(", adj_l, ',', adj_r, ")")
                         # 比较横坐标范围是否一致
                         if abs(cur_l - adj_l) < tolerance and abs(cur_r - adj_r) < tolerance:
                             return True
@@ -82,6 +83,9 @@ def match_two_edge(all_edges, adjacents, positions, idx, direction, tolerance=4)
                         cur_d = cur_edge_d + cur_cropped_y
                         adj_u = adj_edge_u + adj_cropped_y
                         adj_d = adj_edge_d + adj_cropped_y
+                        # 输出两个玻璃比较的反射边缘的范围
+                        print(idx, "号玻璃的", direction, "反射边缘为：(", cur_u, ',', cur_d, ")")
+                        print(adjacent, "号玻璃的", opposite_direction, "反射边缘为：(", adj_u, ',', adj_d, ")")
                         # 比较横坐标范围是否一致
                         if abs(cur_u - adj_u) < tolerance and abs(cur_d - adj_d) < tolerance:
                             return True
